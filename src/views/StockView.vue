@@ -49,7 +49,10 @@ const selectedProduct = ref<Product | null>(null)
 async function fetchProducts() {
   loading.value = true
   try {
-    const response = await api.get('/Products/listAll')
+    const userId = localStorage.getItem('userId')
+    const response = await api.get('/Products/listAll', {
+      headers: userId ? { 'X-User-Id': userId } : undefined,
+    })
     products.value = response.data.products
   } catch (error) {
     console.error('Erro ao buscar produtos', error)
