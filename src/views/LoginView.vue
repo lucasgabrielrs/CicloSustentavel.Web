@@ -4,6 +4,13 @@ import axios from 'axios'
 import { api } from '@/services/api'
 import { useRouter } from 'vue-router'
 import ThemeToggle from '@/components/ThemeToggle.vue'
+import { saveAuthFromLogin } from '@/services/auth'
+import {
+  clearCompanyStorage,
+  normalizeCompaniesFromLogin,
+  saveCompanies,
+  setActiveCompany,
+} from '@/utils/companyStorage'
 
 const router = useRouter()
 const loading = ref(false)
@@ -19,20 +26,31 @@ async function handleLogin() {
   errorMessage.value = ''
 
   try {
-    const response = await api.post('/User/Login', {
+    const response = await api.post('/Login', {
       email: form.email,
       password: form.password,
     })
 
     const userData = response.data
 
-    localStorage.setItem('userId', userData.id.toString())
-    localStorage.setItem('userName', userData.name)
-    localStorage.setItem('userEmail', userData.email)
-    localStorage.setItem('userRole', userData.role)
-    localStorage.setItem('cnpj', userData.cnpj)
+    saveAuthFromLogin(userData)
 
-    //localStorage.setItem('token', response.data.token)
+    clearCompanyStorage()
+    const companies = normalizeCompaniesFromLogin(userData)
+    saveCompanies(companies)
+
+    if (companies.length > 1) {
+      router.push('/select-company')
+      return
+    }
+
+    if (companies.length === 1) {
+      const firstCompany = companies[0]
+      if (firstCompany) {
+        setActiveCompany(firstCompany.id)
+      }
+    }
+
     router.push('/stock')
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {

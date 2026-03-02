@@ -7,6 +7,8 @@ import CreateEditModal from '@/components/CreateEditModal.vue'
 import ProductForm from '@/components/ProductForm.vue'
 import ProductDetailsModal from '@/components/ProductDetailsModal.vue'
 import DeleteConfirmModal from '@/components/DeleteConfirmModal.vue'
+import { getActiveCompanyId } from '@/utils/companyStorage'
+import { PlusCircleIcon, PlayIcon } from '@heroicons/vue/24/solid'
 
 interface Product {
   id: number
@@ -49,10 +51,17 @@ const selectedProduct = ref<Product | null>(null)
 async function fetchProducts() {
   loading.value = true
   try {
-    const userId = localStorage.getItem('userId')
+    const activeCompanyId = getActiveCompanyId()
+
     const response = await api.get('/Products/listAll', {
-      headers: userId ? { 'X-User-Id': userId } : undefined,
+      params: activeCompanyId ? { companyId: activeCompanyId } : undefined,
     })
+
+    if (response.status == 204) {
+      products.value = []
+      return
+    }
+
     products.value = response.data.products
   } catch (error) {
     console.error('Erro ao buscar produtos', error)
@@ -210,27 +219,32 @@ onMounted(fetchProducts)
 </script>
 
 <template>
-  <div class="min-h-screen bg-zinc-100 dark:bg-zinc-950 transition-colors duration-300 flex">
+  <div
+    class="min-h-screen bg-zinc-100 dark:bg-zinc-950 transition-colors duration-300 flex overflow-x-hidden"
+  >
     <AppSidebar />
 
-    <main class="flex-1">
-      <div class="max-w-7xl mx-auto px-6 py-8">
+    <main class="flex-1 min-w-0">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-          <h1 class="text-2xl font-bold text-zinc-800 dark:text-white">Gestão de Estoque</h1>
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
+          <h1 class="text-xl sm:text-2xl font-bold text-zinc-800 dark:text-white">
+            Gestão de Estoque
+          </h1>
           <button
             @click="openCreateModal"
-            class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-emerald-900/20"
+            class="w-full sm:w-auto justify-center flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-emerald-900/20"
           >
-            ✚ Adicionar Produto
+            <PlusCircleIcon class="size-5" />
+            Adicionar Produto
           </button>
         </div>
 
         <!-- Filtros -->
         <div
-          class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 mb-5 flex flex-wrap gap-4 transition-colors duration-300"
+          class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 mb-5 flex flex-col sm:flex-row sm:flex-wrap gap-4 transition-colors duration-300"
         >
-          <div class="flex-1 min-w-[180px]">
+          <div class="flex-1 min-w-0 sm:min-w-45">
             <label
               class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wide"
               >Buscar</label
@@ -243,7 +257,7 @@ onMounted(fetchProducts)
             />
           </div>
 
-          <div class="flex-1 min-w-[180px]">
+          <div class="flex-1 min-w-0 sm:min-w-45">
             <label
               class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wide"
               >Categoria</label
@@ -269,7 +283,7 @@ onMounted(fetchProducts)
           class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden transition-colors duration-300"
         >
           <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="w-full min-w-190">
               <thead class="bg-zinc-50 dark:bg-zinc-800/50">
                 <tr>
                   <th
@@ -326,7 +340,7 @@ onMounted(fetchProducts)
                   <td class="px-5 py-4">
                     <div class="flex items-center gap-3">
                       <div
-                        class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-600/20 flex items-center justify-center text-lg flex-shrink-0"
+                        class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-600/20 flex items-center justify-center text-lg shrink-0"
                       >
                         {{ getCategoryIcon(product.category) }}
                       </div>
@@ -394,7 +408,7 @@ onMounted(fetchProducts)
 
           <!-- Paginação -->
           <div
-            class="px-5 py-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center"
+            class="px-4 sm:px-5 py-4 border-t border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
           >
             <span class="text-sm text-zinc-400">
               Mostrando {{ (currentPage - 1) * itemsPerPage + 1 }}-{{
@@ -402,13 +416,13 @@ onMounted(fetchProducts)
               }}
               de {{ filteredProducts.length }} produtos
             </span>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
               <button
                 @click="currentPage--"
                 :disabled="currentPage === 1"
                 class="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-emerald-500 hover:text-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed text-sm font-semibold transition-all"
               >
-                ◀
+                <PlayIcon class="rotate-180 size-3" />
               </button>
 
               <button
@@ -430,7 +444,7 @@ onMounted(fetchProducts)
                 :disabled="currentPage === totalPages"
                 class="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-emerald-500 hover:text-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed text-sm font-semibold transition-all"
               >
-                ▶
+                <PlayIcon class="size-3" />
               </button>
             </div>
           </div>

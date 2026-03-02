@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { api } from '@/services/api'
+import { getActiveCompanyId } from '@/utils/companyStorage'
 
 interface ProductFormData {
   id?: number
@@ -13,6 +14,7 @@ interface ProductFormData {
   unitOfMeasurement: string
   origin: string
   packagingType: string
+  empresaId?: string
 }
 
 interface Props {
@@ -35,6 +37,7 @@ const form = ref<ProductFormData>({
   unitOfMeasurement: '0',
   origin: 'Local',
   packagingType: '0',
+  empresaId: getActiveCompanyId() || undefined,
 })
 
 const loading = ref(false)
@@ -56,6 +59,7 @@ watch(
         origin: 'Local',
         packagingType: '0',
         description: '',
+        empresaId: getActiveCompanyId() || undefined,
       }
     }
   },

@@ -2,6 +2,16 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ThemeToggle from '@/components/ThemeToggle.vue'
+import { clearAuthSession } from '@/services/auth'
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ArrowLeftStartOnRectangleIcon,
+  BuildingOffice2Icon,
+  UserIcon,
+  ChartPieIcon,
+  CubeIcon,
+} from '@heroicons/vue/24/solid'
 
 const isExpanded = ref(false)
 const route = useRoute()
@@ -12,15 +22,15 @@ function toggleSidebar() {
 }
 
 function handleLogout() {
-  localStorage.removeItem('userId')
+  clearAuthSession()
   router.push('/login')
 }
 </script>
 
 <template>
   <aside
-    :class="isExpanded ? 'w-64' : 'w-20'"
-    class="relative bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 px-3 py-6 flex flex-col transition-all duration-300"
+    :class="isExpanded ? 'w-64' : 'w-16 sm:w-20'"
+    class="relative bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-300 dark:border-zinc-800 shadow-xl shadow-zinc-200/60 dark:shadow-none px-3 py-6 flex flex-col transition-all duration-300"
   >
     <button
       type="button"
@@ -28,7 +38,8 @@ function handleLogout() {
       class="absolute -right-3 top-8 w-7 h-7 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center text-xs shadow-lg shadow-emerald-900/20 transition-colors"
       :aria-label="isExpanded ? 'Recolher menu lateral' : 'Expandir menu lateral'"
     >
-      {{ isExpanded ? '<' : '\>' }}
+      <ChevronLeftIcon v-if="isExpanded" class="size-4" />
+      <ChevronRightIcon v-else class="size-4" />
     </button>
 
     <div
@@ -46,13 +57,13 @@ function handleLogout() {
         to="/dashboard"
         :class="[
           route.path === '/dashboard'
-            ? 'bg-emerald-600 text-white'
-            : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800',
+            ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-900/20'
+            : 'text-zinc-700 dark:text-zinc-200 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-white dark:hover:bg-zinc-800',
           isExpanded ? 'justify-start px-4' : 'justify-center px-2',
         ]"
         class="w-full h-11 flex items-center gap-2 rounded-lg font-semibold transition-colors"
       >
-        <span>📊</span>
+        <ChartPieIcon class="size-5 text-current" />
         <span v-if="isExpanded">Dashboard</span>
       </RouterLink>
 
@@ -60,13 +71,13 @@ function handleLogout() {
         to="/stock"
         :class="[
           route.path === '/stock'
-            ? 'bg-emerald-600 text-white'
-            : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800',
+            ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-900/20'
+            : 'text-zinc-700 dark:text-zinc-200 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-white dark:hover:bg-zinc-800',
           isExpanded ? 'justify-start px-4' : 'justify-center px-2',
         ]"
         class="w-full h-11 flex items-center gap-2 rounded-lg font-semibold transition-colors"
       >
-        <span>📦</span>
+        <CubeIcon class="size-5 text-current" />
         <span v-if="isExpanded">Estoque</span>
       </RouterLink>
 
@@ -74,13 +85,13 @@ function handleLogout() {
         to="/minhaEmpresa"
         :class="[
           route.path === '/minhaEmpresa'
-            ? 'bg-emerald-600 text-white'
-            : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800',
+            ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-900/20'
+            : 'text-zinc-700 dark:text-zinc-200 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-white dark:hover:bg-zinc-800',
           isExpanded ? 'justify-start px-4' : 'justify-center px-2',
         ]"
         class="w-full h-11 flex items-center gap-2 rounded-lg font-semibold transition-colors"
       >
-        <span>🏢</span>
+        <BuildingOffice2Icon class="size-5 text-current" />
         <span v-if="isExpanded">Minha Empresa</span>
       </RouterLink>
 
@@ -88,13 +99,13 @@ function handleLogout() {
         to="/profile"
         :class="[
           route.path === '/profile'
-            ? 'bg-emerald-600 text-white'
-            : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800',
+            ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-900/20'
+            : 'text-zinc-700 dark:text-zinc-200 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-white dark:hover:bg-zinc-800',
           isExpanded ? 'justify-start px-4' : 'justify-center px-2',
         ]"
         class="w-full h-11 flex items-center gap-2 rounded-lg font-semibold transition-colors"
       >
-        <span>👤</span>
+        <UserIcon class="size-5 text-current" />
         <span v-if="isExpanded">Perfil</span>
       </RouterLink>
     </nav>
@@ -104,9 +115,9 @@ function handleLogout() {
         type="button"
         @click="handleLogout"
         :class="isExpanded ? 'justify-start px-4' : 'justify-center px-2'"
-        class="w-full h-11 flex items-center gap-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-semibold transition-colors"
+        class="w-full h-11 flex items-center gap-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-red-600 dark:hover:text-red-400 font-semibold transition-colors"
       >
-        <span>↩</span>
+        <ArrowLeftStartOnRectangleIcon class="size-6 text-current" />
         <span v-if="isExpanded">Sair</span>
       </button>
 
